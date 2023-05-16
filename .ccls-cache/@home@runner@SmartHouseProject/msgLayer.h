@@ -75,6 +75,7 @@ msg_t receiveMessage(msgq_t *queue_ptr);
 /* functions for env_data_t */
 int getTime(void);
 void setTime(int time);
+void addTime(void);
 
 /* functions for time_data_t */
 int getTimeOutletOn(void);

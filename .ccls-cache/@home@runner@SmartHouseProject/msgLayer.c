@@ -126,6 +126,12 @@ void setTime(int time) {
   pthread_mutex_unlock(&(env_data.env_lock));
 }
 
+void addTime(void) {
+  pthread_mutex_lock(&(env_data.env_lock));
+  env_data.hour = (env_data.hour + 1) % 24;
+  pthread_mutex_unlock(&(env_data.env_lock));
+}
+
 /* functions for time_data_t */
 int getTimeOutletOn(void) {
   int time;
@@ -168,3 +174,4 @@ void setDurationLightOn(int time) {
   time_data.duration_light_on = time;
   pthread_mutex_unlock(&(time_data.time_lock));
 }
+
