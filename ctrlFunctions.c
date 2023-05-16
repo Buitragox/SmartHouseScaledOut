@@ -82,7 +82,7 @@ CONTROLLER_STATES ctrlIdle(msg_t *in_msg) {
     default:
       break;
     }
-    printf("\t--- Controller sent signal: confirmChange %d\n",
+    printf("\t--- Controller sent signal: confirmChange(%d) TO Cloud \n",
            out_msg.value_int);
     fflush(stdout);
     sendMessage(&(queue[CLOUD_Q]), out_msg);

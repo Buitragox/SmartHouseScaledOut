@@ -1,7 +1,9 @@
-#ifndef STATE_FUNCTIONS_H
-#define STATE_FUNCTIONS_H
+#ifndef CTRL_FUNCTIONS_H
+#define CTRL_FUNCTIONS_H
 
 #include "msgLayer.h"
+#include <stdio.h>
+#include <unistd.h>
 
 typedef enum {
   MaxTempRule,
@@ -19,6 +21,5 @@ CONTROLLER_STATES ctrlWaitConsumption(msg_t *in_msg);
 CONTROLLER_STATES ctrlHighConsumption(msg_t *in_msg);
 CONTROLLER_STATES ctrlWaitIntensity(msg_t *in_msg);
 CONTROLLER_STATES ctrlWaitReport(msg_t *in_msg);
-
 
 #endif
