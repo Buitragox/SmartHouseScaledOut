@@ -140,7 +140,6 @@ void *pUser(void *arg) {
     printf("2. Activate movement sensor\n");
     printf("3. Send temperature read\n");
     printf("4. Add 1 hour to clock\n");
-    printf("Enter the maximum value of the temperature: ");
     fflush(stdout);
     fflush(stdin);
     scanf("%d", &opt);
@@ -274,10 +273,12 @@ void *pUser(void *arg) {
     case 4:
       addTime();
       break;
-    }
 
-    return NULL;
+    default:
+      break;
+    }
   }
+  return NULL;
 }
 
 int main(void) {
