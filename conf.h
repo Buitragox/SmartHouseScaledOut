@@ -63,7 +63,8 @@ typedef enum {
   appDecision,
   confirmChange,
   ruleUpdated,
-  consumptionDevices
+  consumptionDevices,
+  makeReport
 } TO_CLOUD;
 
 typedef enum {
