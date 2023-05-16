@@ -32,8 +32,6 @@ typedef struct {
 /***( User defined signals )***************************************************
  */
 
-/* MSC On Off Light */
-
 /* Signals to light sensor */
 typedef enum { intensityRequest } TO_LIGHT_SENSOR;
 
@@ -80,11 +78,6 @@ typedef enum {
   timerOnOL,
   timerOffOL
 } TO_CONTROLLER;
-
-typedef enum {
-  sGetId
-} TO_CENTRAL; /* Signals sent from process pLocal
-                to process pCentral */
 
 /***( User-defined EFSM states )********************
 
