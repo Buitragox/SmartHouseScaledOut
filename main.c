@@ -26,6 +26,104 @@ void *pOutletClock(void *arg) {
   }
 }
 
+void *pLightSensor(void *arg) {
+  int luxLevels[24] = {
+      10,  // 12:00 AM (Midnight)
+      10,  // 1:00 AM
+      10,  // 2:00 AM
+      10,  // 3:00 AM
+      10,  // 4:00 AM
+      10,  // 5:00 AM
+      50,  // 6:00 AM
+      100, // 7:00 AM
+      200, // 8:00 AM
+      300, // 9:00 AM
+      500, // 10:00 AM
+      700, // 11:00 AM
+      800, // 12:00 PM (Noon)
+      700, // 1:00 PM
+      500, // 2:00 PM
+      300, // 3:00 PM
+      200, // 4:00 PM
+      100, // 5:00 PM
+      50,  // 6:00 PM
+      30,  // 7:00 PM
+      20,  // 8:00 PM
+      10,  // 9:00 PM
+      10,  // 10:00 PM
+      10   // 11:00 PM
+  };
+  LIGHT_STATES state = IdleL;
+  msg_t out_msg;
+  msg_t in_msg;
+  int now;
+  printf("\t--- Light Sensor init\n");
+  fflush(stdout);
+
+  while (TRUE) {
+    in_msg = receiveMessage(&(queue[LIGHT_Q]));
+    switch (state) {
+    case IdleL:
+      if (in_msg.signal == intensityRequest) {
+        now = getTime();
+        out_msg.signal = lightIntensity;
+        out_msg.value_float = luxLevels[now];
+        sendMessage(&(queue[CONTROLLER_Q]), out_msg);
+        printf("\t--- LightSensor sent signal: lightIntensity(%f) TO "
+               "Controller\n",
+               out_msg.value_float);
+      }
+      break;
+
+    default:
+      break;
+    }
+  }
+}
+
+void *pWattmeter(void *arg) {
+  WATT_STATES state = IdleW;
+  msg_t out_msg;
+  msg_t in_msg;
+  int watts;
+  int MAX_WATT = 200;
+  int MIN_WATT = 5;
+  srand(time(NULL));
+
+  printf("\t--- Wattmeter init\n");
+  fflush(stdout);
+
+  while (TRUE) {
+    in_msg = receiveMessage(&(queue[WATT_Q]));
+    switch (state) {
+    case IdleW:
+      watts = MIN_WATT + (rand() % (MAX_WATT - MIN_WATT));
+      if (in_msg.signal == consumptionRequest) {
+        out_msg.signal = consumption;
+        out_msg.value_int = 0; // wattmeter id
+        out_msg.value_float = watts;
+        sendMessage(&(queue[CONTROLLER_Q]), out_msg);
+        printf("\t--- Wattmeter sent signal: consumption(%d, %f) TO "
+               "Controller\n",
+               out_msg.value_int, out_msg.value_float);
+      } //
+      else if (in_msg.signal == reportConsumptionRequest) {
+        out_msg.signal = reportConsumption;
+        out_msg.value_int = 0; // wattmeter id
+        out_msg.value_float = watts;
+        sendMessage(&(queue[CONTROLLER_Q]), out_msg);
+        printf("\t--- Wattmeter sent signal: reportConsumption(%d, %f) TO "
+               "Controller\n",
+               out_msg.value_int, out_msg.value_float);
+      }
+      break;
+
+    default:
+      break;
+    }
+  }
+}
+
 void *pController(void *arg) {
   CONTROLLER_STATES state = IdleC;
   msg_t in_msg; /* input message */
@@ -33,7 +131,7 @@ void *pController(void *arg) {
   pthread_t clock_tid;
   pthread_create(&clock_tid, NULL, pOutletClock, NULL);
 
-  printf("Controller init\n");
+  printf("\t--- Controller init\n");
   fflush(stdout);
 
   while (TRUE) {
@@ -73,7 +171,7 @@ void *pApp(void *arg) {
   APP_STATES state = IdleA;
   msg_t in_msg; /* input message */
 
-  printf("App init\n");
+  printf("\t--- App init\n");
   fflush(stdout);
 
   while (TRUE) {
@@ -103,7 +201,7 @@ void *pCloud(void *arg) {
   CLOUD_STATES state = IdleCl;
   msg_t in_msg; /* input message */
 
-  printf("Cloud init\n");
+  printf("\t--- Cloud init\n");
   fflush(stdout);
 
   while (TRUE) {
@@ -140,6 +238,7 @@ void *pUser(void *arg) {
     printf("2. Activate movement sensor\n");
     printf("3. Send temperature read\n");
     printf("4. Add 1 hour to clock\n");
+    printf("5. Send on/off signal (only use when asked)\n");
     fflush(stdout);
     fflush(stdin);
     scanf("%d", &opt);
@@ -148,12 +247,13 @@ void *pUser(void *arg) {
     // CHANGE RULE
     case 1:
       printf("What rule do you want to change?\n");
-      printf("1. Temperature\n");
-      printf("2. Consumption\n");
-      printf("3. Outlet set time on\n");
-      printf("4. Outlet set time off\n");
-      printf("5. Light Intensity\n");
-      printf("6. Light Duration\n");
+      printf("1. Max Temperature\n");
+      printf("2. Min Temperature\n");
+      printf("3. Consumption\n");
+      printf("4. Outlet set time on\n");
+      printf("5. Outlet set time off\n");
+      printf("6. Light Intensity\n");
+      printf("7. Light Duration\n");
       printf("Select one option: ");
       fflush(stdout);
       fflush(stdin);
@@ -170,7 +270,9 @@ void *pUser(void *arg) {
         out_msg.value_float = in_float;
 
         sendMessage(&(queue[APP_Q]), out_msg);
+        break;
 
+      case 2:
         printf("Enter the minimun value of the temperature: ");
         fflush(stdout);
         fflush(stdin);
@@ -183,7 +285,7 @@ void *pUser(void *arg) {
         sendMessage(&(queue[APP_Q]), out_msg);
         break;
 
-      case 2:
+      case 3:
         printf("Enter the consumption threshold: ");
         fflush(stdout);
         fflush(stdin);
@@ -196,7 +298,7 @@ void *pUser(void *arg) {
         sendMessage(&(queue[APP_Q]), out_msg);
         break;
 
-      case 3:
+      case 4:
         printf("Enter the turn on time: ");
         fflush(stdout);
         fflush(stdin);
@@ -209,7 +311,7 @@ void *pUser(void *arg) {
         sendMessage(&(queue[APP_Q]), out_msg);
         break;
 
-      case 4:
+      case 5:
         printf("Enter the turn off time: ");
         fflush(stdout);
         fflush(stdin);
@@ -222,7 +324,7 @@ void *pUser(void *arg) {
         sendMessage(&(queue[APP_Q]), out_msg);
         break;
 
-      case 5:
+      case 6:
         printf("Enter the Light Intensity threshold: ");
         fflush(stdout);
         fflush(stdin);
@@ -235,7 +337,7 @@ void *pUser(void *arg) {
         sendMessage(&(queue[APP_Q]), out_msg);
         break;
 
-      case 6:
+      case 7:
         printf("Enter the turn on duration: ");
         scanf("%f", &in_float);
 
@@ -274,6 +376,17 @@ void *pUser(void *arg) {
       addTime();
       break;
 
+    // Send on/off signal
+    case 5:
+      printf("Keep outlet ON or turn OFF (0: Off, 1: On): ");
+      fflush(stdout);
+      fflush(stdin);
+      scanf("%d", &in_int);
+      out_msg.signal = userDecision;
+      out_msg.value_int = in_int;
+      sendMessage(&(queue[APP_Q]), out_msg);
+      break;
+
     default:
       break;
     }
@@ -298,6 +411,8 @@ int main(void) {
   pthread_create(&controller_tid, NULL, pController, NULL);
   pthread_create(&app_tid, NULL, pApp, NULL);
   pthread_create(&cloud_tid, NULL, pCloud, NULL);
+  pthread_create(&light_tid, NULL, pLightSensor, NULL);
+  pthread_create(&watt_tid, NULL, pWattmeter, NULL);
   /*
   pthread_create ( &hw_tid, NULL, pHardware, NULL );
   pthread_create ( &cntrllr_tid, NULL, pController, NULL );
@@ -307,6 +422,8 @@ int main(void) {
   pthread_join(controller_tid, NULL);
   pthread_join(app_tid, NULL);
   pthread_join(cloud_tid, NULL);
+  pthread_join(light_tid, NULL);
+  pthread_join(watt_tid, NULL);
 
   /* Destroy queues */
 
