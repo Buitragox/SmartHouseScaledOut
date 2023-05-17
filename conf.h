@@ -110,11 +110,11 @@ WaitConsumption
 WaitIntensity
 
  ****************************/
-typedef enum { IdleL } LIGHT_SENSOR;
+typedef enum { IdleL } LIGHT_STATES;
 
-typedef enum { IdleT } TEMP_SENSOR;
+typedef enum { IdleT } TEMP_STATES;
 
-typedef enum { IdleW } WATT_SENSOR;
+typedef enum { IdleW } WATT_STATES;
 
 typedef enum { IdleCl, WaitConfirmRule, WaitReportCl } CLOUD_STATES;
 
