@@ -2,11 +2,17 @@
 
 // Function for timer that turns off light
 static void *pTimerTurnOffLight(void *arg) {
+  printf("\t--- TimerTurnOffLight init\n");
+  fflush(stdout);
   msg_t out_msg; /* output message */
   int seconds = getDurationLightOn();
+  // printf("\t--- TimerTurnOffLight before sleep\n");
   sleep(seconds); // There are other solutions using time.h
+  // printf("\t--- TimerTurnOffLight finish sleep\n");
   out_msg.signal = timerOffLight;
   sendMessage(&(queue[CONTROLLER_Q]), out_msg);
+  printf("\t--- TimerTurnOffLight sent signal: timerOffLight TO "
+         "Controller\n");
   return NULL;
 }
 
@@ -24,7 +30,7 @@ CONTROLLER_STATES ctrlIdle(msg_t *in_msg) {
     // Update max temperature
     case MaxTempRule:
       // Check for valid max temperature value
-      if (in_msg->value_float <= ctrl_data.min_temp) {
+      if (in_msg->value_float > ctrl_data.min_temp) {
         out_msg.value_int = TRUE;
         ctrl_data.max_temp = in_msg->value_float;
       }
@@ -33,7 +39,7 @@ CONTROLLER_STATES ctrlIdle(msg_t *in_msg) {
     // Update min temperature
     case MinTempRule:
       // Check for valid min temperature value
-      if (in_msg->value_float >= ctrl_data.max_temp) {
+      if (in_msg->value_float < ctrl_data.max_temp) {
         out_msg.value_int = TRUE;
         ctrl_data.max_temp = in_msg->value_float;
       }
@@ -232,8 +238,8 @@ CONTROLLER_STATES ctrlWaitIntensity(msg_t *in_msg) {
     if (in_msg->value_float < ctrl_data.light_intensity_th) {
       out_msg.signal = turnOnLight;
       /* Send message to actuator LIGHT */
-      printf("\t--- Controller sent signal: turnOnOutlet\n");
-      next_state = HighConsumption;
+      printf("\t--- Controller sent signal: turnOnLight\n");
+      next_state = IdleC;
 
       // LAUNCH TIMER
       // TODO: cancel running timer if necessary
