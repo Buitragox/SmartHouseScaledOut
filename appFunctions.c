@@ -50,7 +50,8 @@ APP_STATES appWaitConfirmUpdate(msg_t *in_msg) {
     out_msg.signal = confirmRule;
     out_msg.value_int = in_msg->value_int;
     /* Send message to user */
-    printf("\t--- App sent signal: confirmRule %d\n", out_msg.value_int);
+    printf("\t--- App sent signal: confirmRule(%d) TO User\n",
+           out_msg.value_int);
     next_state = IdleA;
     break;
 
