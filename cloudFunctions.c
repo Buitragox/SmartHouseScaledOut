@@ -22,25 +22,6 @@ CLOUD_STATES cloudIdle(msg_t *in_msg) {
     next_state = WaitReportCl;
     break;
 
-  /*
-  case decisionRequest:
-    out_msg.signal = appDecisionRequest;
-    sendMessage(&(queue[APP_Q]), out_msg);
-    printf("\t--- Cloud sent signal: appDecisionRequest TO App\n");
-    next_state = IdleCl;
-    break;
-  
-
-  case appDecision:
-    out_msg.signal = cloudDecision;
-    out_msg.value_int = in_msg->value_int;
-    sendMessage(&(queue[CONTROLLER_Q]), out_msg);
-    printf("\t--- Cloud sent signal: cloudDecision(%d) TO Controller\n",
-           out_msg.value_int);
-    next_state = IdleCl;
-    break;
-  */
-
   default:
     break;
   }
