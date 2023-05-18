@@ -76,7 +76,7 @@ CONTROLLER_STATES ctrlIdle(msg_t *in_msg) {
       // Check for valid min temperature value
       if (in_msg->value_float < ctrl_data.max_temp) {
         out_msg.value_int = TRUE;
-        ctrl_data.max_temp = in_msg->value_float;
+        ctrl_data.min_temp = in_msg->value_float;
       }
       break;
 
