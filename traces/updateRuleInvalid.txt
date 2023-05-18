@@ -1,0 +1,35 @@
+[0:00] Choose an action:
+1. Change rule value
+2. Activate movement sensor
+3. Send temperature read
+4. Add 1 hour to clock
+5. Set time
+	--- Cloud init
+	--- Light Sensor init
+	--- TimerLight init
+	--- Wattmeter init
+	--- App init
+	--- Controller init
+	--- ClockTrigger init
+1
+What rule do you want to change?
+1. Max Temperature
+2. Min Temperature
+3. Consumption
+4. Outlet set time on
+5. Outlet set time off
+6. Light Intensity
+7. Light Duration
+Select one option: 3
+Enter the consumption threshold: -100
+[0:00] Choose an action:
+1. Change rule value
+2. Activate movement sensor
+3. Send temperature read
+4. Add 1 hour to clock
+5. Set time
+	--- App sent signal: ruleUpdated(2, -100.000000) TO Cloud
+	--- Cloud sent signal: changeParameter(2, -100.000000) TO Controller
+	--- Controller sent signal: confirmChange(0) TO Cloud 
+	--- App sent signal: confirmRule(0) TO User
+	--- Cloud sent signal: confirmUpdate(0) TO App

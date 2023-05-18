@@ -1,0 +1,31 @@
+[0:00] Choose an action:
+1. Change rule value
+2. Activate movement sensor
+3. Send temperature read
+4. Add 1 hour to clock
+5. Set time
+	--- App init
+	--- Controller init
+	--- Cloud init
+	--- Light Sensor init
+	--- Wattmeter init
+	--- TimerLight init
+	--- ClockTrigger init
+5
+Enter a time of day in hours (0-23): 12
+[12:00] Choose an action:
+1. Change rule value
+2. Activate movement sensor
+3. Send temperature read
+4. Add 1 hour to clock
+5. Set time
+2
+[12:00] Choose an action:
+1. Change rule value
+2. Activate movement sensor
+3. Send temperature read
+4. Add 1 hour to clock
+5. Set time
+	--- Controller sent signal: intensityRequest TO LightSensor
+	--- LightSensor sent signal: lightIntensity(800.000000) TO Controller
+	--- Controller sent signal: turnOffLight
