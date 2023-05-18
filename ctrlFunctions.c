@@ -288,5 +288,4 @@ CONTROLLER_STATES ctrlWaitReport(msg_t *in_msg) {
   fflush(stdout);
 
   return next_state;
-  z
 }
