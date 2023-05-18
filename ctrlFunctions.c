@@ -1,13 +1,47 @@
 #include "ctrlFunctions.h"
 
 // Function for timer that turns off light
-void *pTimerTurnOffLight(void *arg) {
-  printf("\t--- TimerTurnOffLight init\n");
-  fflush(stdout);
-  msg_t out_msg; /* output message */
-  int seconds = getDurationLightOn();
+void *pTimerLight(void *arg) {
+  TIMER_STATES state = IdleLT;
 
-  sleep(seconds);
+  msg_t out_msg;
+  msg_t in_msg;
+
+  printf("\t--- TimerLight init\n");
+  fflush(stdout);
+
+  while (TRUE) {
+    in_msg = receiveMessage(&(queue[CLOUD_Q]));
+    switch (state) {
+    case IdleLT:
+      if (in_msg.signal == setTimer) {
+        int seconds = getDurationLightOn();
+        sleep(seconds);
+        out_msg.signal = expiredTimer;
+        sendMessage(&(queue[TIMER_Q]), out_msg);
+        printf("\t--- TimerLight sent signal: expiredTimer TO "
+               "SELF\n");
+        state = TimerExpired;
+      }
+      break;
+
+    case TimerExpired:
+      if (in_msg.signal == resetTimer) {
+        state = IdleLT;
+      } //
+      else if (in_msg.signal == expiredTimer) {
+        out_msg.signal = timerOffLight;
+        sendMessage(&(queue[CONTROLLER_Q]), out_msg);
+        printf("\t--- TimerLight sent signal: timerOffLight TO "
+               "Controller\n");
+      }
+      state = IdleLT;
+      break;
+
+    default:
+      break;
+    }
+  }
 
   out_msg.signal = timerOffLight;
   sendMessage(&(queue[CONTROLLER_Q]), out_msg);
@@ -207,8 +241,13 @@ CONTROLLER_STATES ctrlWaitIntensity(msg_t *in_msg) {
 
       // LAUNCH TIMER
       // TODO: cancel running timer if necessary
-      pthread_t timerOff_tid;
-      pthread_create(&timerOff_tid, NULL, pTimerTurnOffLight, NULL);
+      out_msg.signal = resetTimer;
+      sendMessage(&(queue[TIMER_Q]), out_msg);
+      printf("\t--- Controller sent signal: resetTimer TO TimerLight\n");
+
+      out_msg.signal = setTimer;
+      sendMessage(&(queue[TIMER_Q]), out_msg);
+      printf("\t--- Controller sent signal: setTimer TO TimerLight\n");
 
     } // If light intensity is high
     else {
