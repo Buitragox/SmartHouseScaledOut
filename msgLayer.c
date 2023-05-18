@@ -37,7 +37,7 @@ void initiliseData(void) {
   time_data.duration_light_on = 5;
   time_data.time_outlet_off = 23; // 11PM
   time_data.time_outlet_on = 6;   // 6AM
-  time_data.time_make_report = 0;
+  time_data.time_make_report = 1;
   pthread_mutex_init(&(time_data.time_lock), NULL);
 }
 
