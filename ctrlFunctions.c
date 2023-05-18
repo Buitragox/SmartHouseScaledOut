@@ -275,6 +275,9 @@ CONTROLLER_STATES ctrlWaitReport(msg_t *in_msg) {
   case reportConsumption:
     out_msg.signal = consumptionDevices;
     out_msg.value_float = in_msg->value_float;
+    sendMessage(&(queue[TIMER_Q]), out_msg);
+    printf("\t--- Controller sent signal: consumptionDevices(%f) TO Cloud\n",
+           out_msg.value_float);
     next_state = IdleC;
     break;
 
@@ -285,4 +288,5 @@ CONTROLLER_STATES ctrlWaitReport(msg_t *in_msg) {
   fflush(stdout);
 
   return next_state;
+  z
 }
