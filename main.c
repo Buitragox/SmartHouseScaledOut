@@ -21,6 +21,8 @@ void *pClockTrigger(void *arg) {
     if (now == off_time) {
       out_msg.signal = timerOffOL;
       sendMessage(&(queue[CONTROLLER_Q]), out_msg);
+      printf("\t--- ClockTrigger sent signal: timerOffOL TO "
+             "Controller\n");
       sleep(1); // waste time
       event = TRUE;
     }
@@ -28,6 +30,8 @@ void *pClockTrigger(void *arg) {
     else if (now == on_time) {
       out_msg.signal = timerOnOL;
       sendMessage(&(queue[CONTROLLER_Q]), out_msg);
+      printf("\t--- ClockTrigger sent signal: timerOnOL TO "
+             "Controller\n");
       sleep(1); // waste time
       event = TRUE;
     }
@@ -35,6 +39,8 @@ void *pClockTrigger(void *arg) {
     if (now == report_time) {
       out_msg.signal = makeReport;
       sendMessage(&(queue[CLOUD_Q]), out_msg);
+      printf("\t--- ClockTrigger sent signal: makeReport TO "
+             "Cloud\n");
       event = TRUE;
     }
 
@@ -415,7 +421,6 @@ int main(void) {
   initialiseQueues();
   initiliseData();
 
-  pthread_create(&clock_tid, NULL, pClockTrigger, NULL);
   pthread_create(&env_tid, NULL, pUser, NULL);
   pthread_create(&controller_tid, NULL, pController, NULL);
   pthread_create(&app_tid, NULL, pApp, NULL);
@@ -423,6 +428,8 @@ int main(void) {
   pthread_create(&light_tid, NULL, pLightSensor, NULL);
   pthread_create(&watt_tid, NULL, pWattmeter, NULL);
   pthread_create(&timer_tid, NULL, pTimerLight, NULL);
+  sleep(1); // give time for main processes to initialize
+  pthread_create(&clock_tid, NULL, pClockTrigger, NULL);
 
   pthread_join(env_tid, NULL);
   pthread_join(controller_tid, NULL);
