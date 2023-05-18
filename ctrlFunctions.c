@@ -254,7 +254,7 @@ CONTROLLER_STATES ctrlWaitIntensity(msg_t *in_msg) {
     else {
       out_msg.signal = turnOffLight;
       /* Send message to actuator OUTLET */
-      printf("\t--- Controller sent signal: turnOffOutlet\n");
+      printf("\t--- Controller sent signal: turnOffLight\n");
       next_state = IdleC;
     }
     break;
