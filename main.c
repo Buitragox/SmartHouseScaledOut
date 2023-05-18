@@ -10,6 +10,10 @@ void *pClockTrigger(void *arg) {
   int off_time, on_time, report_time, now;
   boolean event;
   msg_t out_msg;
+
+  printf("\t--- ClockTrigger init\n");
+  fflush(stdout);
+
   while (TRUE) {
     event = FALSE;
     now = getTime();
