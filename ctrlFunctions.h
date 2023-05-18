@@ -18,8 +18,9 @@ typedef enum {
 /* Behavior of controller process in each state */
 CONTROLLER_STATES ctrlIdle(msg_t *in_msg);
 CONTROLLER_STATES ctrlWaitConsumption(msg_t *in_msg);
-CONTROLLER_STATES ctrlHighConsumption(msg_t *in_msg);
+// CONTROLLER_STATES ctrlHighConsumption(msg_t *in_msg);
 CONTROLLER_STATES ctrlWaitIntensity(msg_t *in_msg);
 CONTROLLER_STATES ctrlWaitReport(msg_t *in_msg);
+void *pTimerTurnOffLight(void *arg);
 
 #endif

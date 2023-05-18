@@ -15,15 +15,17 @@ APP_STATES appIdle(msg_t *in_msg) {
     next_state = WaitConfirmUpdate;
     break;
 
-  case appDecisionRequest:
-    out_msg.signal = userDecisionRequest;
-    /* Send message to user */
-    printf("\t--- App sent signal: userDecisionRequest\n");
-    printf("\t--- App waiting for USER INPUT\n");
-    next_state = WaitUserDecision;
+    /*
+    case appDecisionRequest:
+      out_msg.signal = userDecisionRequest;
+      // Send message to user
+      printf("\t--- App sent signal: userDecisionRequest\n");
+      printf("\t--- App waiting for USER INPUT\n");
+      next_state = WaitUserDecision;
 
-    // TODO: Set timer
-    break;
+      // TODO: Set timer
+      break;
+    */
 
   case consumptionReport:
     out_msg.signal = showReport;
@@ -63,9 +65,10 @@ APP_STATES appWaitConfirmUpdate(msg_t *in_msg) {
   return next_state;
 }
 
+/*
 APP_STATES appWaitUserDecision(msg_t *in_msg) {
   APP_STATES next_state = IdleA;
-  msg_t out_msg; /* output message */
+  msg_t out_msg; // output message
 
   switch (in_msg->signal) {
   case userDecision:
@@ -85,3 +88,4 @@ APP_STATES appWaitUserDecision(msg_t *in_msg) {
   fflush(stdout);
   return next_state;
 }
+*/

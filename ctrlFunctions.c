@@ -1,14 +1,14 @@
 #include "ctrlFunctions.h"
 
 // Function for timer that turns off light
-static void *pTimerTurnOffLight(void *arg) {
+void *pTimerTurnOffLight(void *arg) {
   printf("\t--- TimerTurnOffLight init\n");
   fflush(stdout);
   msg_t out_msg; /* output message */
   int seconds = getDurationLightOn();
-  // printf("\t--- TimerTurnOffLight before sleep\n");
-  sleep(seconds); // There are other solutions using time.h
-  // printf("\t--- TimerTurnOffLight finish sleep\n");
+
+  sleep(seconds);
+
   out_msg.signal = timerOffLight;
   sendMessage(&(queue[CONTROLLER_Q]), out_msg);
   printf("\t--- TimerTurnOffLight sent signal: timerOffLight TO "
@@ -146,7 +146,6 @@ CONTROLLER_STATES ctrlIdle(msg_t *in_msg) {
     next_state = IdleC;
     break;
 
-  // TODO: Define behavior of actuator time ON
   case timerOnOL:
     out_msg.signal = turnOnOutlet;
     /* Send message to actuator OUTLET */
@@ -177,44 +176,9 @@ CONTROLLER_STATES ctrlWaitConsumption(msg_t *in_msg) {
   switch (in_msg->signal) {
   case consumption:
     if (in_msg->value_float > ctrl_data.consump_th) {
-      out_msg.signal = decisionRequest;
-      sendMessage(&(queue[CLOUD_Q]), out_msg);
-      next_state = HighConsumption;
-    } //
-    else {
       out_msg.signal = turnOffOutlet;
-      /* Send message to actuator OUTLET */
       printf("\t--- Controller sent signal: turnOffOutlet\n");
-      next_state = IdleC;
-    }
-    break;
-
-  default:
-    break;
-  }
-
-  fflush(stdout);
-
-  return next_state;
-}
-
-CONTROLLER_STATES ctrlHighConsumption(msg_t *in_msg) {
-  CONTROLLER_STATES next_state;
-  msg_t out_msg; /* output message */
-
-  switch (in_msg->signal) {
-  case cloudDecision:
-    // if decision == ON
-    if (in_msg->value_int == TRUE) {
-      out_msg.signal = turnOnOutlet;
-      /* Send message to actuator OUTLET */
-      printf("\t--- Controller sent signal: turnOnOutlet\n");
-      next_state = IdleC;
-    } // if decision == OFF
-    else {
-      out_msg.signal = turnOffOutlet;
-      /* Send message to actuator OUTLET */
-      printf("\t--- Controller sent signal: turnOffOutlet\n");
+      // sendMessage(&(queue[CLOUD_Q]), out_msg);
       next_state = IdleC;
     }
     break;
