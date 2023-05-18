@@ -37,6 +37,7 @@ void initiliseData(void) {
   time_data.duration_light_on = 5;
   time_data.time_outlet_off = 23; // 11PM
   time_data.time_outlet_on = 6;   // 6AM
+  time_data.time_make_report = 0;
   pthread_mutex_init(&(time_data.time_lock), NULL);
 }
 
@@ -53,7 +54,6 @@ void initialiseQueues(void) {
     queue[i].bufin = 0;
     queue[i].bufout = 0;
     pthread_mutex_init(&(queue[i].buffer_lock), NULL);
-    /* queue [i].buffer_lock = PTHREAD_MUTEX_INITIALIZER; */
     /* Create semaphores */
     sem_init(&(queue[i].items), LOCAL, 0);       /* There are no messages */
     sem_init(&(queue[i].slots), LOCAL, BUFSIZE); /* There are BUFSIZE slots */
@@ -161,6 +161,20 @@ void setTimeOutletOff(int time) {
   pthread_mutex_unlock(&(time_data.time_lock));
 }
 
+int getTimeMakeReport(void) {
+  int time;
+  pthread_mutex_lock(&(time_data.time_lock));
+  time = time_data.time_make_report;
+  pthread_mutex_unlock(&(time_data.time_lock));
+  return time;
+}
+
+void setTimeMakeReport(int time) {
+  pthread_mutex_lock(&(time_data.time_lock));
+  time_data.time_make_report = time;
+  pthread_mutex_unlock(&(time_data.time_lock));
+}
+
 int getDurationLightOn(void) {
   int time;
   pthread_mutex_lock(&(time_data.time_lock));
@@ -174,4 +188,3 @@ void setDurationLightOn(int time) {
   time_data.duration_light_on = time;
   pthread_mutex_unlock(&(time_data.time_lock));
 }
-

@@ -13,13 +13,14 @@
 /***( Manifest constants for user-defined queuing system  )********************/
 
 #define BUFSIZE 8      /* number of slots in queues */
-#define NUM_QUEUES 6   /* number of queues */
+#define NUM_QUEUES 7   /* number of queues */
 #define CLOUD_Q 0      /* queue 0: cloud process */
 #define CONTROLLER_Q 1 /* queue 1: controller process */
 #define APP_Q 2        /* queue 2: app process */
 #define LIGHT_Q 3      /* queue 3: light sensor process */
 #define TEMP_Q 4       /* queue 4: temperature sensor process */
 #define WATT_Q 5       /* queue 5: wattmeter sensor process */
+#define TIMER_Q 6       /* queue 5: wattmeter sensor process */
 
 /***( User-defined message structure )*****************************************/
 

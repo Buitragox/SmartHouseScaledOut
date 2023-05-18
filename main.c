@@ -5,24 +5,45 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void *pOutletClock(void *arg) {
-  int off_time, on_time, now;
+/* Waits for the specified time to trigger daytime bound events */
+void *pClockTrigger(void *arg) {
+  int off_time, on_time, report_time, now;
+  boolean event;
   msg_t out_msg;
   while (TRUE) {
+    event = FALSE;
     now = getTime();
     off_time = getTimeOutletOff();
     on_time = getTimeOutletOn();
+    report_time = getTimeMakeReport();
+
+    // Trigger event to turn OFF outlets
     if (now == off_time) {
       out_msg.signal = timerOffOL;
       sendMessage(&(queue[CONTROLLER_Q]), out_msg);
-      addTime();
-    } //
+      sleep(1); // waste time
+      event = TRUE;
+    }
+    // Trigger event to turn ON outlets
     else if (now == on_time) {
       out_msg.signal = timerOnOL;
       sendMessage(&(queue[CONTROLLER_Q]), out_msg);
-      addTime();
+      sleep(1); // waste time
+      event = TRUE;
     }
-    sleep(2);
+    // Trigger event to make report
+    if (now == report_time) {
+      out_msg.signal = makeReport;
+      sendMessage(&(queue[CLOUD_Q]), out_msg);
+      event = TRUE;
+    }
+
+    // If an event happened, add time
+    if (event) {
+      addTime(); // add +1 to time to avoid infinite loop
+    }
+
+    sleep(1);
   }
 }
 
@@ -86,7 +107,7 @@ void *pWattmeter(void *arg) {
   msg_t out_msg;
   msg_t in_msg;
   int watts;
-  int MAX_WATT = 200;
+  int MAX_WATT = 60;
   int MIN_WATT = 5;
   srand(time(NULL));
 
@@ -128,9 +149,6 @@ void *pController(void *arg) {
   CONTROLLER_STATES state = IdleC;
   msg_t in_msg; /* input message */
 
-  pthread_t clock_tid;
-  pthread_create(&clock_tid, NULL, pOutletClock, NULL);
-
   printf("\t--- Controller init\n");
   fflush(stdout);
 
@@ -145,10 +163,6 @@ void *pController(void *arg) {
       state = ctrlWaitConsumption(&in_msg);
       break;
 
-    case HighConsumption:
-      state = ctrlHighConsumption(&in_msg);
-      break;
-
     case WaitIntensity:
       state = ctrlWaitIntensity(&in_msg);
       break;
@@ -161,8 +175,6 @@ void *pController(void *arg) {
       break;
     }
   }
-
-  pthread_join(clock_tid, NULL);
 
   return NULL;
 }
@@ -183,10 +195,6 @@ void *pApp(void *arg) {
 
     case WaitConfirmUpdate:
       state = appWaitConfirmUpdate(&in_msg);
-      break;
-
-    case WaitUserDecision:
-      state = appWaitUserDecision(&in_msg);
       break;
 
     default:
@@ -238,7 +246,7 @@ void *pUser(void *arg) {
     printf("2. Activate movement sensor\n");
     printf("3. Send temperature read\n");
     printf("4. Add 1 hour to clock\n");
-    printf("5. Send on/off signal (only use when asked)\n");
+    printf("5. Set time\n");
     fflush(stdout);
     fflush(stdin);
     scanf("%d", &opt);
@@ -376,15 +384,13 @@ void *pUser(void *arg) {
       addTime();
       break;
 
-    // Send on/off signal
+    // Manually set time
     case 5:
-      printf("Keep outlet ON or turn OFF (0: Off, 1: On): ");
+      printf("Enter a time of day in hours (0-23): ");
       fflush(stdout);
       fflush(stdin);
       scanf("%d", &in_int);
-      out_msg.signal = userDecision;
-      out_msg.value_int = in_int;
-      sendMessage(&(queue[APP_Q]), out_msg);
+      setTime(in_int);
       break;
 
     default:
@@ -402,21 +408,21 @@ int main(void) {
   pthread_t light_tid;      /* Lights tid */
   pthread_t temp_tid;       /* Temperature tid */
   pthread_t watt_tid;       /* Wattmeter tid */
+  pthread_t clock_tid;
+  pthread_t timer_tid;
 
   /* Create queues and initialise data */
   initialiseQueues();
   initiliseData();
 
+  pthread_create(&clock_tid, NULL, pClockTrigger, NULL);
   pthread_create(&env_tid, NULL, pUser, NULL);
   pthread_create(&controller_tid, NULL, pController, NULL);
   pthread_create(&app_tid, NULL, pApp, NULL);
   pthread_create(&cloud_tid, NULL, pCloud, NULL);
   pthread_create(&light_tid, NULL, pLightSensor, NULL);
   pthread_create(&watt_tid, NULL, pWattmeter, NULL);
-  /*
-  pthread_create ( &hw_tid, NULL, pHardware, NULL );
-  pthread_create ( &cntrllr_tid, NULL, pController, NULL );
-  */
+  pthread_create(&timer_tid, NULL, pTimerLight, NULL);
 
   pthread_join(env_tid, NULL);
   pthread_join(controller_tid, NULL);
@@ -424,6 +430,8 @@ int main(void) {
   pthread_join(cloud_tid, NULL);
   pthread_join(light_tid, NULL);
   pthread_join(watt_tid, NULL);
+  pthread_join(clock_tid, NULL);
+  pthread_join(timer_tid, NULL);
 
   /* Destroy queues */
 

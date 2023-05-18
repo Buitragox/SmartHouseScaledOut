@@ -39,6 +39,7 @@ typedef struct {
   int time_outlet_on;
   int time_outlet_off;
   int duration_light_on;
+  int time_make_report;
   pthread_mutex_t time_lock; /* mutex for accesing time data */
 } time_data_t;
 
@@ -82,6 +83,8 @@ int getTimeOutletOn(void);
 void setTimeOutletOn(int time);
 int getTimeOutletOff(void);
 void setTimeOutletOff(int time);
+int getTimeMakeReport(void);
+void setTimeMakeReport(int time);
 int getDurationLightOn(void);
 void setDurationLightOn(int time);
 
