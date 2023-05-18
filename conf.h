@@ -79,6 +79,12 @@ typedef enum {
   timerOffOL
 } TO_CONTROLLER;
 
+typedef enum {
+  setTimer,
+  resetTimer,
+  expiredTimer // signal to self
+} TO_TIMER;
+
 /***( User-defined EFSM states )********************
 
 STATES
@@ -127,5 +133,7 @@ typedef enum {
   WaitConsumption,
   WaitIntensity
 } CONTROLLER_STATES;
+
+typedef enum { IdleLT, TimerExpired } TIMER_STATES;
 
 #endif
