@@ -1,0 +1,42 @@
+	--- Cloud init
+	--- TimerLight[0] init 
+	--- Light Sensor[1] init 
+	--- TimerLight[1] init 
+	--- Light Sensor[2] init 
+	--- TimerLight[2] init 
+	--- Light Sensor[3] init 
+	--- TimerLight[3] init 
+	--- Light Sensor[4] init 
+	--- TimerLight[4] init 
+	--- Light Sensor[0] init 
+[0:00] Choose an action:
+1. Change rule value
+2. Activate movement sensor
+3. Send temperature read
+4. Add 1 hour to clock
+5. Set time
+	--- Controller init
+	--- App init
+	--- Light Sensor[5] init 
+	--- TimerLight[5] init 
+	--- Wattmeter[0] init 
+	--- Wattmeter[2] init 
+	--- Wattmeter[1] init 
+	--- ClockTrigger init
+> 5
+Enter a time of day in hours (0-23): > 23
+[23:00] Choose an action:
+1. Change rule value
+2. Activate movement sensor
+3. Send temperature read
+4. Add 1 hour to clock
+5. Set time
+	--- ClockTrigger sent signal: timerOffOL TO Controller
+	--- Controller sent signal: consumptionRequest TO Wattmeter
+	--- Controller sent signal: consumptionRequest TO Wattmeter
+	--- Controller sent signal: consumptionRequest TO Wattmeter
+	--- Wattmeter[2] sent signal: consumption(2, 35.000000) TO Controller
+	--- Wattmeter[0] sent signal: consumption(0, 59.000000) TO Controller
+	--- Wattmeter[1] sent signal: consumption(1, 7.000000) TO Controller
+	--- Controller sent signal: turnOffOutlet(0)
+	--- Controller sent signal: turnOffOutlet(2)

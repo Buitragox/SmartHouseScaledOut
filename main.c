@@ -412,10 +412,11 @@ void *pUser(void *arg) {
       printf("\t4. Porch\n");
       printf("\t5. Hall\n");
       printf("\t6. Garage\n");
-
+      fflush(stdout);
+      fflush(stdin);
       scanf("%d", &opt);
 
-      printf("> %d", opt);
+      printf("> %d\n", opt);
       fflush(stdout);
 
       if (opt < 1 || opt > NUM_LIGHT_S) {
@@ -434,9 +435,10 @@ void *pUser(void *arg) {
       printf("\t1. Living\n");
       printf("\t2. Bed Two\n");
       printf("\t3. Master Suite\n");
-
+      fflush(stdout);
+      fflush(stdin);
       scanf("%d", &opt);
-      printf("> %d", opt);
+      printf("> %d\n", opt);
       fflush(stdout);
 
       if (opt < 1 || opt > 3) {

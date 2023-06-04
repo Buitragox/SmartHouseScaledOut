@@ -1,0 +1,97 @@
+[0:00] Choose an action:
+1. Change rule value
+2. Activate movement sensor
+3. Send temperature read
+4. Add 1 hour to clock
+5. Set time
+	--- Light Sensor[0] init 
+	--- Light Sensor[1] init 
+	--- App init
+	--- TimerLight[1] init 
+	--- Light Sensor[2] init 
+	--- TimerLight[2] init 
+	--- Light Sensor[3] init 
+	--- Light Sensor[4] init 
+	--- TimerLight[4] init 
+	--- Controller init
+	--- Light Sensor[5] init 
+	--- TimerLight[5] init 
+	--- Wattmeter[1] init 
+	--- Wattmeter[2] init 
+	--- Wattmeter[0] init 
+	--- TimerLight[0] init 
+	--- TimerLight[3] init 
+	--- Cloud init
+	--- ClockTrigger init
+> 2
+
+	Select which movement sensor to activate:
+	1. Deck
+	2. Kitchen
+	3. Entry
+	4. Porch
+	5. Hall
+	6. Garage
+> 2
+[0:00] Choose an action:
+1. Change rule value
+2. Activate movement sensor
+3. Send temperature read
+4. Add 1 hour to clock
+5. Set time
+	--- Controller sent signal: intensityRequest TO LightSensor[1]
+	--- LightSensor[1] sent signal: lightIntensity(10.000000) TO Controller
+	--- Controller sent signal: turnOnLight(1)
+	--- Controller sent signal: resetTimer TO TimerLight[1]
+	--- Controller sent signal: setTimer TO TimerLight[1]
+> 2
+
+	Select which movement sensor to activate:
+	1. Deck
+	2. Kitchen
+	3. Entry
+	4. Porch
+	5. Hall
+	6. Garage
+> 3
+[0:00] Choose an action:
+1. Change rule value
+2. Activate movement sensor
+3. Send temperature read
+4. Add 1 hour to clock
+5. Set time
+	--- Controller sent signal: intensityRequest TO LightSensor[2]
+	--- LightSensor[2] sent signal: lightIntensity(10.000000) TO Controller
+	--- Controller sent signal: turnOnLight(2)
+	--- Controller sent signal: resetTimer TO TimerLight[2]
+	--- Controller sent signal: setTimer TO TimerLight[2]
+> 2
+
+	Select which movement sensor to activate:
+	1. Deck
+	2. Kitchen
+	3. Entry
+	4. Porch
+	5. Hall
+	6. Garage
+> 5
+[0:00] Choose an action:
+1. Change rule value
+2. Activate movement sensor
+3. Send temperature read
+4. Add 1 hour to clock
+5. Set time
+	--- Controller sent signal: intensityRequest TO LightSensor[4]
+	--- LightSensor[4] sent signal: lightIntensity(10.000000) TO Controller
+	--- Controller sent signal: turnOnLight(4)
+	--- Controller sent signal: resetTimer TO TimerLight[4]
+	--- Controller sent signal: setTimer TO TimerLight[4]
+	--- TimerLight[1] sent signal: expiredTimer TO SELF
+	--- TimerLight[1] sent signal: timerOffLight TO Controller
+	--- Controller sent signal: turnOffLight
+	--- TimerLight[2] sent signal: expiredTimer TO SELF
+	--- TimerLight[2] sent signal: timerOffLight TO Controller
+	--- Controller sent signal: turnOffLight
+	--- TimerLight[4] sent signal: expiredTimer TO SELF
+	--- TimerLight[4] sent signal: timerOffLight TO Controller
+	--- Controller sent signal: turnOffLight

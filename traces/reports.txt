@@ -1,0 +1,42 @@
+[0:00] Choose an action:
+1. Change rule value
+2. Activate movement sensor
+3. Send temperature read
+4. Add 1 hour to clock
+5. Set time
+	--- Cloud init
+	--- App init
+	--- Light Sensor[0] init 
+	--- Controller init
+	--- TimerLight[0] init 
+	--- Light Sensor[1] init 
+	--- TimerLight[1] init 
+	--- Light Sensor[2] init 
+	--- TimerLight[2] init 
+	--- Light Sensor[3] init 
+	--- TimerLight[3] init 
+	--- Light Sensor[4] init 
+	--- TimerLight[4] init 
+	--- Light Sensor[5] init 
+	--- TimerLight[5] init 
+	--- Wattmeter[0] init 
+	--- Wattmeter[1] init 
+	--- Wattmeter[2] init 
+	--- ClockTrigger init
+> 4
+[1:00] Choose an action:
+1. Change rule value
+2. Activate movement sensor
+3. Send temperature read
+4. Add 1 hour to clock
+5. Set time
+	--- Cloud sent signal: cloudConsumptionReq TO Controller
+	--- Controller sent signal: reportConsumptionRequest TO Wattmeter[0]
+	--- Controller sent signal: reportConsumptionRequest TO Wattmeter[1]
+	--- Controller sent signal: reportConsumptionRequest TO Wattmeter[2]
+	--- Wattmeter[0] sent signal: reportConsumption(0, 59.000000) TO Controller
+	--- Wattmeter[2] sent signal: reportConsumption(2, 56.000000) TO Controller
+	--- Wattmeter[1] sent signal: reportConsumption(1, 19.000000) TO Controller
+	--- Controller sent signal: consumptionDevices(44.666668) TO Cloud
+	--- Cloud sent signal: consumptionReport(44.666668) TO App
+	--- App sent signal: showReport 44.666668
