@@ -9,7 +9,7 @@ APP_STATES appIdle(msg_t *in_msg) {
     out_msg.signal = ruleUpdated;
     out_msg.value_int = in_msg->value_int;
     out_msg.value_float = in_msg->value_float;
-    sendMessage(&(queue[CLOUD_Q]), out_msg);
+    sendMessage(&(main_q[CLOUD_Q]), out_msg);
     printf("\t--- App sent signal: ruleUpdated(%d, %f) TO Cloud\n",
            out_msg.value_int, out_msg.value_float);
     next_state = WaitConfirmUpdate;

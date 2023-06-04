@@ -9,7 +9,7 @@ CLOUD_STATES cloudIdle(msg_t *in_msg) {
     out_msg.signal = changeParameter;
     out_msg.value_int = in_msg->value_int;
     out_msg.value_float = in_msg->value_float;
-    sendMessage(&(queue[CONTROLLER_Q]), out_msg);
+    sendMessage(&(main_q[CONTROLLER_Q]), out_msg);
     printf("\t--- Cloud sent signal: changeParameter(%d, %f) TO Controller\n",
            out_msg.value_int, out_msg.value_float);
     next_state = WaitConfirmRule;
@@ -17,7 +17,7 @@ CLOUD_STATES cloudIdle(msg_t *in_msg) {
 
   case makeReport:
     out_msg.signal = cloudConsumptionReq;
-    sendMessage(&(queue[CONTROLLER_Q]), out_msg);
+    sendMessage(&(main_q[CONTROLLER_Q]), out_msg);
     printf("\t--- Cloud sent signal: cloudConsumptionReq TO Controller\n");
     next_state = WaitReportCl;
     break;
@@ -38,7 +38,7 @@ CLOUD_STATES cloudWaitConfirmRule(msg_t *in_msg) {
   case confirmChange:
     out_msg.signal = confirmUpdate;
     out_msg.value_int = in_msg->value_int;
-    sendMessage(&(queue[APP_Q]), out_msg);
+    sendMessage(&(main_q[APP_Q]), out_msg);
     printf("\t--- Cloud sent signal: confirmUpdate(%d) TO App\n",
            out_msg.value_int);
     next_state = IdleCl;
@@ -61,7 +61,7 @@ CLOUD_STATES cloudWaitReport(msg_t *in_msg) {
     out_msg.signal = consumptionReport;
     out_msg.value_int = in_msg->value_int;
     out_msg.value_float = in_msg->value_float;
-    sendMessage(&(queue[APP_Q]), out_msg);
+    sendMessage(&(main_q[APP_Q]), out_msg);
     printf("\t--- Cloud sent signal: consumptionReport(%f) TO App\n",
            out_msg.value_float);
     next_state = IdleCl;

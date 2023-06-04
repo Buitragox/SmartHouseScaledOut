@@ -2,25 +2,26 @@
 
 // Function for timer that turns off light
 void *pTimerLight(void *arg) {
+  int pid = *((int *)arg);
   TIMER_STATES state = IdleLT;
-
   msg_t out_msg;
   msg_t in_msg;
 
-  printf("\t--- TimerLight init\n");
+  printf("\t--- TimerLight[%d] init \n", pid);
   fflush(stdout);
 
   while (TRUE) {
-    in_msg = receiveMessage(&(queue[TIMER_Q]));
+    in_msg = receiveMessage(&(timer_q[pid]));
     switch (state) {
     case IdleLT:
       if (in_msg.signal == setTimer) {
         int seconds = getDurationLightOn();
         sleep(seconds);
         out_msg.signal = expiredTimer;
-        sendMessage(&(queue[TIMER_Q]), out_msg);
-        printf("\t--- TimerLight sent signal: expiredTimer TO "
-               "SELF\n");
+        sendMessage(&(timer_q[pid]), out_msg);
+        printf("\t--- TimerLight[%d] sent signal: expiredTimer TO "
+               "SELF\n",
+               pid);
         state = TimerExpired;
       }
       break;
@@ -31,9 +32,10 @@ void *pTimerLight(void *arg) {
       } //
       else if (in_msg.signal == expiredTimer) {
         out_msg.signal = timerOffLight;
-        sendMessage(&(queue[CONTROLLER_Q]), out_msg);
-        printf("\t--- TimerLight sent signal: timerOffLight TO "
-               "Controller\n");
+        sendMessage(&(main_q[CONTROLLER_Q]), out_msg);
+        printf("\t--- TimerLight[%d] sent signal: timerOffLight TO "
+               "Controller\n",
+               pid);
       }
       state = IdleLT;
       break;
@@ -44,10 +46,6 @@ void *pTimerLight(void *arg) {
     fflush(stdout);
   }
 
-  out_msg.signal = timerOffLight;
-  sendMessage(&(queue[CONTROLLER_Q]), out_msg);
-  printf("\t--- TimerTurnOffLight sent signal: timerOffLight TO "
-         "Controller\n");
   return NULL;
 }
 
@@ -126,51 +124,63 @@ CONTROLLER_STATES ctrlIdle(msg_t *in_msg) {
     printf("\t--- Controller sent signal: confirmChange(%d) TO Cloud \n",
            out_msg.value_int);
     fflush(stdout);
-    sendMessage(&(queue[CLOUD_Q]), out_msg);
+    sendMessage(&(main_q[CLOUD_Q]), out_msg);
 
     break;
 
   case temperature:
     next_state = IdleC;
+    out_msg.value_int = in_msg->value_int;
+    // Turn on AC
     if (in_msg->value_float > ctrl_data.max_temp) {
       out_msg.signal = turnOnAC;
       out_msg.value_float = ctrl_data.desired_temp;
       /* Send message to actuator AC */
       out_msg.signal = turnOffH;
       /* Send message to actuator H */
-      printf("\t--- Controller sent signal turnOnAC\n");
-      printf("\t--- Controller sent signal turnOffH\n");
-    } //
+      printf("\t--- Controller sent signal: turnOnAC(%d)\n", out_msg.value_int);
+      printf("\t--- Controller sent signal: turnOffH(%d)\n", out_msg.value_int);
+    } // Turn on H
     else if (in_msg->value_float < ctrl_data.min_temp) {
       out_msg.signal = turnOnH;
       out_msg.value_float = ctrl_data.desired_temp;
       /* Send message to actuator H */
       out_msg.signal = turnOffAC;
       /* Send message to actuator AC */
-      printf("\t--- Controller sent signal: turnOnH\n");
-      printf("\t--- Controller sent signal: turnOffAC\n");
-    } else {
+      printf("\t--- Controller sent signal: turnOnH(%d)\n", out_msg.value_int);
+      printf("\t--- Controller sent signal: turnOffAC(%d)\n",
+             out_msg.value_int);
+    } // Turn off both
+    else {
       out_msg.signal = turnOffH;
       /* Send message to actuator H */
       out_msg.signal = turnOffAC;
       /* Send message to actuator AC */
-      printf("\t--- Controller sent signal: turnOffH\n");
-      printf("\t--- Controller sent signal: turnOffAC\n");
+      printf("\t--- Controller sent signal: turnOffH(%d)\n", out_msg.value_int);
+      printf("\t--- Controller sent signal: turnOffAC(%d)\n",
+             out_msg.value_int);
     }
     break;
 
   case movementDetected:
     out_msg.signal = intensityRequest;
-    sendMessage(&(queue[LIGHT_Q]), out_msg);
-    printf("\t--- Controller sent signal: intensityRequest TO LightSensor\n");
+    sendMessage(&(light_q[in_msg->value_int]), out_msg);
+    printf(
+        "\t--- Controller sent signal: intensityRequest TO LightSensor[%d]\n",
+        in_msg->value_int);
     next_state = WaitIntensity;
     break;
 
   case cloudConsumptionReq:
     out_msg.signal = reportConsumptionRequest;
-    sendMessage(&(queue[WATT_Q]), out_msg);
-    printf("\t--- Controller sent signal: reportConsumptionRequest TO "
-           "Wattmeter\n");
+    // Send reportConsumptionRequest to all wattmeters
+    for (int i = 0; i < NUM_WATT_S; i++) {
+      sendMessage(&(watt_q[i]), out_msg);
+      printf("\t--- Controller sent signal: reportConsumptionRequest TO "
+             "Wattmeter[%d]\n",
+             i);
+    }
+    ctrl_data.idx = 0;
     next_state = WaitReportC;
     break;
 
@@ -183,15 +193,20 @@ CONTROLLER_STATES ctrlIdle(msg_t *in_msg) {
 
   case timerOnOL:
     out_msg.signal = turnOnOutlet;
-    /* Send message to actuator OUTLET */
-    printf("\t--- Controller sent signal: turnOnOutlet\n");
+    for (int i = 0; i < NUM_WATT_S; i++) {
+      /* Send message to actuator OUTLET */
+      printf("\t--- Controller sent signal: turnOnOutlet(%d)\n", i);
+    }
     next_state = IdleC;
     break;
 
   case timerOffOL:
     out_msg.signal = consumptionRequest;
-    sendMessage(&(queue[WATT_Q]), out_msg);
-    printf("\t--- Controller sent signal: consumptionRequest TO Wattmeter\n");
+    for (int i = 0; i < NUM_WATT_S; i++) {
+      sendMessage(&(watt_q[i]), out_msg);
+      printf("\t--- Controller sent signal: consumptionRequest TO Wattmeter\n");
+    }
+    ctrl_data.idx = 0;
     next_state = WaitConsumption;
     break;
 
@@ -210,10 +225,17 @@ CONTROLLER_STATES ctrlWaitConsumption(msg_t *in_msg) {
 
   switch (in_msg->signal) {
   case consumption:
+    ctrl_data.idx++;
     if (in_msg->value_float > ctrl_data.consump_th) {
       out_msg.signal = turnOffOutlet;
-      printf("\t--- Controller sent signal: turnOffOutlet\n");
-      // sendMessage(&(queue[CLOUD_Q]), out_msg);
+      out_msg.value_int = in_msg->value_int;
+      printf("\t--- Controller sent signal: turnOffOutlet(%d)\n",
+             out_msg.value_int);
+    }
+
+    if (ctrl_data.idx < NUM_WATT_S) {
+      next_state = WaitConsumption;
+    } else {
       next_state = IdleC;
     }
     break;
@@ -237,24 +259,27 @@ CONTROLLER_STATES ctrlWaitIntensity(msg_t *in_msg) {
     if (in_msg->value_float < ctrl_data.light_intensity_th) {
       out_msg.signal = turnOnLight;
       /* Send message to actuator LIGHT */
-      printf("\t--- Controller sent signal: turnOnLight\n");
+      printf("\t--- Controller sent signal: turnOnLight(%d)\n",
+             in_msg->value_int);
       next_state = IdleC;
 
       // LAUNCH TIMER
-      // TODO: cancel running timer if necessary
       out_msg.signal = resetTimer;
-      sendMessage(&(queue[TIMER_Q]), out_msg);
-      printf("\t--- Controller sent signal: resetTimer TO TimerLight\n");
+      sendMessage(&(timer_q[in_msg->value_int]), out_msg);
+      printf("\t--- Controller sent signal: resetTimer TO TimerLight[%d]\n",
+             in_msg->value_int);
 
       out_msg.signal = setTimer;
-      sendMessage(&(queue[TIMER_Q]), out_msg);
-      printf("\t--- Controller sent signal: setTimer TO TimerLight\n");
+      sendMessage(&(timer_q[in_msg->value_int]), out_msg);
+      printf("\t--- Controller sent signal: setTimer TO TimerLight[%d]\n",
+             in_msg->value_int);
 
     } // If light intensity is high
     else {
       out_msg.signal = turnOffLight;
       /* Send message to actuator OUTLET */
-      printf("\t--- Controller sent signal: turnOffLight\n");
+      printf("\t--- Controller sent signal: turnOffLight(%d)\n",
+             in_msg->value_int);
       next_state = IdleC;
     }
     break;
@@ -271,17 +296,34 @@ CONTROLLER_STATES ctrlWaitIntensity(msg_t *in_msg) {
 CONTROLLER_STATES ctrlWaitReport(msg_t *in_msg) {
   CONTROLLER_STATES next_state;
   msg_t out_msg; /* output message */
+  float averageConsumption = 0.0;
+  int i;
 
   switch (in_msg->signal) {
   case reportConsumption:
-    out_msg.signal = consumptionDevices;
-    out_msg.value_float = in_msg->value_float;
-    sendMessage(&(queue[CLOUD_Q]), out_msg);
-    printf("\t--- Controller sent signal: consumptionDevices(%f) TO Cloud\n",
-           out_msg.value_float);
-    next_state = IdleC;
-    break;
 
+    // TODO SET ValuesPerDevice(idx) := DeviceValue
+    // it goes here
+    ctrl_data.valuesPerDevice[ctrl_data.idx] = in_msg->value_float;
+    ctrl_data.idx++;
+
+    if (ctrl_data.idx >= NUM_WATT_S) {
+      out_msg.signal = consumptionDevices;
+      for (i = 0; i < NUM_WATT_S; i++) {
+        averageConsumption += ctrl_data.valuesPerDevice[i];
+      }
+      averageConsumption /= NUM_WATT_S;
+      out_msg.value_float = averageConsumption; // send average consumption
+      sendMessage(&(main_q[CLOUD_Q]), out_msg);
+      printf("\t--- Controller sent signal: consumptionDevices(%f) TO Cloud\n",
+             out_msg.value_float);
+      next_state = IdleC;
+    } //
+    else {
+      next_state = WaitReportC;
+    }
+
+    break;
   default:
     break;
   }

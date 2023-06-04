@@ -33,6 +33,8 @@ typedef struct {
   float desired_temp;
   float consump_th;
   float light_intensity_th;
+  int idx;
+  float valuesPerDevice[NUM_WATT_S];
 } ctrl_data_t;
 
 typedef struct {
@@ -55,8 +57,17 @@ typedef struct /* message queue structure */
 
 /***( External variables )************************************************/
 
-extern msgq_t queue[NUM_QUEUES]; /* declare queue as an array of
-                                      message queues */
+extern msgq_t main_q[NUM_QUEUES]; /* declare queue as an array of
+                              message queues */
+
+extern msgq_t light_q[NUM_LIGHT_S]; /* declare queue as an array of
+                              message queues */
+
+extern msgq_t timer_q[NUM_LIGHT_S]; /* declare queue as an array of
+                              message queues */
+
+extern msgq_t watt_q[NUM_WATT_S]; /* declare queue as an array of
+                              message queues */
 
 extern env_data_t env_data;
 
@@ -68,8 +79,8 @@ extern time_data_t time_data;
 
 void initiliseData(void);
 void destroyData(void);
-void initialiseQueues(void);
-void destroyQueues(void);
+void initialiseQueues(msgq_t *queueArray, int size);
+void destroyQueues(msgq_t *queueArray, int size);
 void sendMessage(msgq_t *queue_ptr, msg_t msg);
 msg_t receiveMessage(msgq_t *queue_ptr);
 

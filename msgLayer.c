@@ -11,8 +11,15 @@
 
 /***( Global variables )**************************************************/
 
-msgq_t queue[NUM_QUEUES]; /* declare queue as an array of
-                              message queues */
+msgq_t main_q[NUM_QUEUES]; /* message queues for the 3 main processes:
+                              App, Cloud and Controller */
+
+msgq_t light_q[NUM_LIGHT_S]; /* message queues for light sensors */
+
+msgq_t timer_q[NUM_LIGHT_S]; /* message queues for light timers */
+
+msgq_t watt_q[NUM_WATT_S]; /* message queues for wattmeters */
+
 env_data_t env_data;
 
 ctrl_data_t ctrl_data;
@@ -34,7 +41,7 @@ void initiliseData(void) {
   ctrl_data.consump_th = 30.0;
 
   // time_data init
-  time_data.duration_light_on = 5;
+  time_data.duration_light_on = 10;
   time_data.time_outlet_off = 23; // 11PM
   time_data.time_outlet_on = 6;   // 6AM
   time_data.time_make_report = 1;
@@ -46,17 +53,17 @@ void destroyData(void) {
   pthread_mutex_destroy(&(time_data.time_lock));
 }
 
-/* initialise array of message queues  */
-void initialiseQueues(void) {
+/* initialise arrays of message queues  */
+void initialiseQueues(msgq_t queueArray[], int size) {
   int i;
-
-  for (i = 0; i < NUM_QUEUES; i++) {
-    queue[i].bufin = 0;
-    queue[i].bufout = 0;
-    pthread_mutex_init(&(queue[i].buffer_lock), NULL);
+  for (i = 0; i < size; i++) {
+    queueArray[i].bufin = 0;
+    queueArray[i].bufout = 0;
+    pthread_mutex_init(&(queueArray[i].buffer_lock), NULL);
     /* Create semaphores */
-    sem_init(&(queue[i].items), LOCAL, 0);       /* There are no messages */
-    sem_init(&(queue[i].slots), LOCAL, BUFSIZE); /* There are BUFSIZE slots */
+    sem_init(&(queueArray[i].items), LOCAL, 0); /* There are no messages */
+    sem_init(&(queueArray[i].slots), LOCAL,
+             BUFSIZE); /* There are BUFSIZE slots */
   }
 }
 
@@ -81,15 +88,15 @@ static msg_t GetMsg(msgq_t *queue_ptr) {
 }
 
 /* destroy array of message queues  */
-void destroyQueues(void) {
+void destroyQueues(msgq_t queueArray[], int size) {
   int i;
 
-  for (i = 0; i < NUM_QUEUES; i++) {
+  for (i = 0; i < size; i++) {
     /* Destroy mutex */
-    pthread_mutex_destroy(&(queue[i].buffer_lock));
+    pthread_mutex_destroy(&(queueArray[i].buffer_lock));
     /* Destroy semaphores */
-    sem_destroy(&(queue[i].items));
-    sem_destroy(&(queue[i].slots));
+    sem_destroy(&(queueArray[i].items));
+    sem_destroy(&(queueArray[i].slots));
   }
 }
 
